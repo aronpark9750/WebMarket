@@ -64,10 +64,15 @@ public class ProductServlet extends HttpServlet {
 		String productCompany = request.getParameter("productCompany");
 		String productTag = request.getParameter("productTag");
 		int productStock = Integer.parseInt(request.getParameter("productStock"));
-		
 		ProductDTO product = new ProductDTO(productId, productName, productPrice, productInfo, productCompany, productTag, productStock);
-		if(product != null) {
-			instance.createProduct(product);
+		
+		try {			
+			if(product != null) {
+				instance.createProduct(product, request);
+			}
+		}catch (SQLException e) {
+			e.printStackTrace();
+			response.sendRedirect("ProductList.jsp");
 		}
 		response.sendRedirect("ProductList.jsp");
 	}
@@ -87,26 +92,29 @@ public class ProductServlet extends HttpServlet {
 		String productTag = request.getParameter("productTag");
 		int productStock = Integer.parseInt(request.getParameter("productStock"));
 		
-		ProductDTO product = new ProductDTO(productId, productName, productPrice, productInfo, productCompany, productTag, productStock);
-		if(product != null) {
-			instance.updateProduct(product);
+		try {
+			ProductDTO product = new ProductDTO(productId, productName, productPrice, productInfo, productCompany, productTag, productStock);
+			if(product != null) {
+				instance.updateProduct(product, request);
+			}
+			response.sendRedirect("ProductList.jsp");			
+		}catch (SQLException e) {
+			e.printStackTrace();
 		}
-		response.sendRedirect("ProductList.jsp");
 	}
 	/**
 	 * 데이터베이스에서 상품 삭제하는 코드
 	 * @param request
 	 * @param response
+	 * @throws IOException 
 	 */
-	private void removeProduct(HttpServletRequest request, HttpServletResponse response) {
+	private void removeProduct(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			String productId = request.getParameter("productId");
-			
 			try {
-				instance.removeProduct(productId);
-				
+				instance.removeProduct(productId, request);
 				response.sendRedirect("ProductList.jsp");
 				
-			}catch (Exception e) {
+			}catch (SQLException e) {
 				e.printStackTrace();
 			}
 	}
@@ -115,8 +123,9 @@ public class ProductServlet extends HttpServlet {
 	 * 상품을 장바구니에 추가하는 코드
 	 * @param request
 	 * @param response
+	 * @throws IOException 
 	 */
-	private void orderProduct(HttpServletRequest request, HttpServletResponse response) {
+	private void orderProduct(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		HttpSession session = request.getSession();
 		ArrayList<CartDTO> cart = (ArrayList<CartDTO>)session.getAttribute("cart");
 		String productId = request.getParameter("productId");
@@ -143,9 +152,10 @@ public class ProductServlet extends HttpServlet {
 					cart.add(cartItem);
 				}
 				session.setAttribute("cart", cart);
+				session.setAttribute("message", "장바구니에 상품이 추가되었습니다.");
 				response.sendRedirect("ProductCart.jsp");
 			}
-		}catch (Exception e) {
+		}catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}

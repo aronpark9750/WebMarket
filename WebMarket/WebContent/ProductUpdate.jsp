@@ -9,6 +9,11 @@
 <meta charset="UTF-8">
 <head><link rel="stylesheet" href="./resource/css/bootstrap.min.css">
 <title>상품 수정</title>
+<script>
+	function confirmRemove(){
+		return confirm("상품을 삭제하시겠습니까?")
+	}
+</script>
 </head>
 <body>
 	<jsp:include page="Nav.jsp"/>
@@ -16,11 +21,21 @@
 		<h1>상품 수정</h1>
 	</div>
 	<%
-		
+		String message = (String)session.getAttribute("message");
+		if(message != null){
+	%>
+		<script type="text/javascript">
+			alert("<%=message %>");
+		</script>
+	<%
+			session.removeAttribute("message");
+		}
+	%>
+	<%	
 		ProductDTO product = (ProductDTO)session.getAttribute("product");
 	%>
 	<div class="container">	
-       <form action="Product" method="post">
+       <form action="Product" method="post" onsubmit="return confirmRemove();">
 	        <div align ="right"class="form-group">
 	        	<input type="hidden" name ="action" value="remove" >
 	        	<input type="hidden" name ="productId" value="<%=product.getProductId() %>">

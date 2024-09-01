@@ -18,6 +18,17 @@
 		<h1>상품 목록</h1>
 	</div>
 	<%
+		String message = (String)session.getAttribute("message");
+		if(message != null){
+	%>
+		<script type="text/javascript">
+			alert('<%=message %>');
+		</script>
+	<%	
+		session.removeAttribute("message");
+		}
+	%>
+	<%
 	 	ProductDAO instance = ProductDAO.getInstance();
 		List<ProductDTO> productlist = instance.getAllProduct();
 	%>

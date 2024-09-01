@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import db.DB;
 import dto.ProductDTO;
@@ -44,7 +46,7 @@ public class ProductDAO {
 				ProductDTO item = new ProductDTO(productId, productName, productPrice, productInfo, productCompany, productTag, productStock);
 				productlist.add(item);
 			}
-		}catch (Exception e) {
+		}catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return productlist;
@@ -54,9 +56,9 @@ public class ProductDAO {
 	 * @param product
 	 * @throws SQLException
 	 */
-	public void createProduct(ProductDTO product) throws SQLException {
+	public void createProduct(ProductDTO product, HttpServletRequest request) throws SQLException {
 		String createSql = "insert into productList (productid, productname, productprice, productinfo, productcompany, producttag, productstock) values (?, ?, ?, ?, ?, ?, ?)";
-		
+		HttpSession session = request.getSession();
 		try(Connection connection = DB.getConnection();
 			PreparedStatement statement = connection.prepareStatement(createSql)){
 				statement.setString(1, product.getProductId());
@@ -68,8 +70,10 @@ public class ProductDAO {
 				statement.setInt(7, product.getProductStock());
 				
 				statement.executeUpdate();
-		}catch (Exception e) {
+				session.setAttribute("message", "상품이 등록되었습니다.");
+		}catch (SQLException e) {
 			e.printStackTrace();
+			session.setAttribute("message", "상품을 등록하는데 실패하였습니다.");
 		}
 	}
 	/**
@@ -97,10 +101,10 @@ public class ProductDAO {
 					
 					product = new ProductDTO(productId, productName, productPrice, productInfo, productCompany, productTag, productStock);
 				}
-			}catch (Exception e) {
+			}catch (SQLException e) {
 				e.printStackTrace();
 			}
-		}catch (Exception e1) {
+		}catch (SQLException e1) {
 			e1.printStackTrace();
 		}
 		return product;
@@ -111,8 +115,9 @@ public class ProductDAO {
 	 * @param product
 	 * @throws SQLException
 	 */
-	public void updateProduct(ProductDTO product) throws SQLException {
+	public void updateProduct(ProductDTO product, HttpServletRequest request) throws SQLException {
 		String updateSql = "update productList set productname = ?, productprice = ?, productinfo = ?, productcompany = ?, producttag = ?, productstock = ? where productid = ?";
+		HttpSession session = request.getSession();
 		try(Connection connection = DB.getConnection();
 			PreparedStatement statement = connection.prepareStatement(updateSql)) {
 			
@@ -125,8 +130,10 @@ public class ProductDAO {
 			statement.setString(7, product.getProductId());
 			
 			statement.executeUpdate();
+			session.setAttribute("message", "상품이 수정되었습니다.");
 		}catch (Exception e) {
 			e.printStackTrace();
+			session.setAttribute("message", "상품을 수정하는데 오류가 발생하였습니다.");
 		}
 	}
 	
@@ -135,16 +142,19 @@ public class ProductDAO {
 	 * @param productId
 	 * @throws SQLException
 	 */
-	public void removeProduct(String productId) throws SQLException {
+	public void removeProduct(String productId, HttpServletRequest request) throws SQLException {
 		String deleteSql = "delete from productList where productid = ?";
-		
+		HttpSession session = request.getSession();
 		try(Connection connection = DB.getConnection();
 			PreparedStatement statement = connection.prepareStatement(deleteSql)){
 				
 				statement.setString(1, productId);
 				statement.executeUpdate();
-		}catch (Exception e) {
+				
+				session.setAttribute("message", "상품을 삭제하였습니다.");
+		}catch (SQLException e) {
 			e.printStackTrace();
+			session.setAttribute("message", "상품을 삭제하는데 오류가 발생하였습니다.");
 		}
 	}
 	/**
@@ -163,7 +173,7 @@ public class ProductDAO {
 				statement.setString(2, ProductId);
 				
 				statement.executeUpdate();
-		}catch (Exception e) {
+		}catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
